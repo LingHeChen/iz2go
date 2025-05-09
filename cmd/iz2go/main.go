@@ -74,7 +74,8 @@ func getRoutes(rootPath, modulePath string) []Route {
 
 		importPath := strings.Replace(filePath, rootPath, "", 1)
 		importPath = strings.Replace(importPath, ".go", "", 1)
-		apiName := strings.Split(importPath, "/")[len(strings.Split(importPath, "/"))-1]
+		fullApiName := strings.Split(importPath, "/")[len(strings.Split(importPath, "/"))-1]
+		handlerName, apiName := ParseApiName(fullApiName)
 		importPath = strings.Join(strings.Split(importPath, "/")[:len(strings.Split(importPath, "/"))-1], "/")
 
 		path := strings.Replace(importPath, "/routes", "", 1)
@@ -82,7 +83,7 @@ func getRoutes(rootPath, modulePath string) []Route {
 		routes = append(routes, Route{
 			ImportPath: modulePath + importPath,
 			Path:       path + "/" + apiName,
-			ApiName:    apiName,
+			ApiName:    handlerName,
 		})
 
 		return nil
@@ -101,6 +102,14 @@ func initPath() (string, string) {
 		log.Fatal("解析 go.mod 失败:", err)
 	}
 	return rootPath, modulePath
+}
+
+func ParseApiName(fullApiName string) (string, string) {
+	parts := strings.Split(fullApiName, "@")
+	if len(parts) == 1 {
+		return parts[0], parts[0]
+	}
+	return parts[0], parts[1]
 }
 
 func runCmdGen(c *cobra.Command, args []string) {

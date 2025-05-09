@@ -9,10 +9,17 @@ go get "github.com/LingHeChen/iz2go"
 go isntall "github.com/LingHeChen/iz2go/cmd/iz2go"
 ```
 ### 2. 编写路由文件
-在项目根目录下创建`/routes`目录，并根据需要添加目录结构(即路由结构)，以`/auth/Login`接口为例
+在项目根目录下创建`/routes`目录，并根据需要添加目录结构(即路由结构)
 ``` plainText
-
+routes
+├── auth
+│   └── Login.go // /auth/Login
+└── path_test
+    └── Handler@*path.go // /auth/*path
 ```
+使用@可以重写路径
+
+编写路由处理器文件，以`/auth/Login`接口为例
 ``` golang
 package auth
 
