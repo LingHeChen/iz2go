@@ -6,7 +6,7 @@
 ### 1. 安装依赖包和生成工具
 ``` shell
 go get "github.com/LingHeChen/iz2go"
-go isntall "github.com/LingHeChen/iz2go/cmd/iz2go"
+go install "github.com/LingHeChen/iz2go/cmd/iz2go"
 ```
 ### 2. 编写路由文件
 在项目根目录下创建`/routes`目录，并根据需要添加目录结构(即路由结构)
