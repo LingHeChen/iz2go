@@ -4,10 +4,6 @@ import "github.com/gin-gonic/gin"
 
 type Decorator = func(handler gin.HandlerFunc) gin.HandlerFunc
 
-type IExecutable interface {
-	Execute(c *gin.Context)
-}
-
 type IWithInit interface {
 	Init()
 }
@@ -16,11 +12,32 @@ type IWithMethod interface {
 	GetMethod() string
 }
 
-type IWithDecorator interface {
-	Decorators() []Decorator
+type IError interface {
+	error
+	GetCode() int
+	GetMessage() string
 }
 
-type IExecutableWithDecorator interface {
-	IExecutable
-	IWithDecorator
+type Error struct {
+	Code    int
+	Message string
+}
+
+func NewError(code int, message string) IError {
+	return &Error{
+		Code:    code,
+		Message: message,
+	}
+}
+
+func (e *Error) Error() string {
+	return e.Message
+}
+
+func (e *Error) GetCode() int {
+	return e.Code
+}
+
+func (e *Error) GetMessage() string {
+	return e.Message
 }
