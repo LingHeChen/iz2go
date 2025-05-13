@@ -1,8 +1,15 @@
 package iz2go
 
-import "github.com/gin-gonic/gin"
+import (
+	"reflect"
+
+	"github.com/gin-gonic/gin"
+)
 
 type HandlerInfo struct {
-	Method  string
-	Handler gin.HandlerFunc
+	Method   string
+	Handler  gin.HandlerFunc
+	ApiName  string
+	Request  reflect.Type
+	Response reflect.Type
 }

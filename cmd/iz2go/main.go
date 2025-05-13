@@ -61,9 +61,12 @@ func parseModulePath(goModPath string) (string, error) {
 	return "", fmt.Errorf("未找到 module 声明")
 }
 
-func getRoutes(rootPath, modulePath string) []Route {
+func getRoutes(rootPath, routeModulePath, modulePath string) []Route {
 	routes := []Route{}
-	filepath.Walk(rootPath+"/routes", func(filePath string, info os.FileInfo, err error) error {
+	if routeModulePath == "" {
+		routeModulePath = "/routes"
+	}
+	filepath.Walk(rootPath+routeModulePath, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -114,12 +117,16 @@ func ParseApiName(fullApiName string) (string, string) {
 
 func runCmdGen(c *cobra.Command, args []string) {
 	rootPath, modulePath := initPath()
+	routeModulePath := ""
+	if len(args) > 0 {
+		routeModulePath = args[0]
+	}
 	templates := template.Must(template.New("code").Parse(codeTemplate))
 	var buf bytes.Buffer
 	templates.Execute(&buf, struct {
 		Routes []Route
 	}{
-		Routes: getRoutes(rootPath, modulePath),
+		Routes: getRoutes(rootPath, routeModulePath, modulePath),
 	})
 	if err := os.MkdirAll(rootPath+"/api_gen", 0755); err != nil {
 		log.Fatal(err)

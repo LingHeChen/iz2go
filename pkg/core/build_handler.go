@@ -29,8 +29,10 @@ func BuildHandler(handler interface{}) *HandlerInfo {
 	handlerFunc := ParseHandler(handler, executableMethod)
 
 	return &HandlerInfo{
-		Method:  method,
-		Handler: handlerFunc,
+		Method:   method,
+		Handler:  handlerFunc,
+		Request:  executableMethod.Type.In(1),
+		Response: executableMethod.Type.Out(0),
 	}
 }
 
@@ -50,10 +52,12 @@ func CheckExecutable(handler interface{}) reflect.Method {
 	}
 
 	// 检查Execute方法的返回值
-	if method.Type.NumOut() != 2 ||
-		method.Type.Out(0).String() != "gin.H" ||
-		method.Type.Out(1).String() != "error" {
-		panic("Execute method must return (gin.H, error)")
+	if method.Type.NumOut() != 2 {
+		panic("Execute method must return two and only two values")
+	}
+	errorType := method.Type.Out(1)
+	if !errorType.Implements(reflect.TypeOf((*IError)(nil)).Elem()) {
+		panic("Execute method must return (Any, IError)")
 	}
 	return method
 }
@@ -115,18 +119,9 @@ func WrapperHandlerFunc(handler reflect.Value, handlerFunc reflect.Value) gin.Ha
 	return func(c *gin.Context) {
 		request := ParseRequest(c, handlerFunc.Type().In(1))
 		ret := handlerFunc.Call([]reflect.Value{handler, request})
-		var response gin.H
 		var err IError
 		var ok bool
-		if !ret[0].IsNil() {
-			response, ok = ret[0].Interface().(gin.H)
-			if !ok {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "response must be gin.H"})
-				return
-			}
-		} else {
-			response = nil
-		}
+		response := ret[0].Interface()
 		if !ret[1].IsNil() {
 			err, ok = ret[1].Interface().(IError)
 			if !ok {

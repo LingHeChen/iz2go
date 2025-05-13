@@ -12,6 +12,10 @@ type IWithMethod interface {
 	GetMethod() string
 }
 
+type IWithSummary interface {
+	GetSummary() string
+}
+
 type IError interface {
 	error
 	GetCode() int
