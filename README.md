@@ -39,25 +39,43 @@ import (
 )
 
 type Login struct {
-	*iz2go.Get // 接口方法 (可选，默认为GET)
+	*iz2go.Post
 	LoginService *services.LoginService
 }
 
-// 接口初始化 (可选)
 func (api *Login) Init() {
 	api.LoginService = &services.LoginService{}
 }
 
-// 接口入口
-func (api *Login) Execute(c *gin.Context) {
-	token, err := api.LoginService.Login("admin", "admin")
-	if err != nil {
-		c.JSON(401, gin.H{"message": "Unauthorized"})
+func (api *Login) Execute(request struct {
+	Ctx  *gin.Context
+	Body struct {
+		Username string `json:"username" description:"用户名"`
+		Password string `json:"password" description:"密码"`
 	}
-	c.JSON(200, gin.H{"message": "Hello, World!", "token": token})
+}) (struct {
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}, iz2go.IError) {
+	token, err := api.LoginService.Login(request.Body.Username, request.Body.Password)
+	if err != nil {
+		return struct {
+			Message string `json:"message"`
+			Token   string `json:"token"`
+		}{
+			Message: "Unauthorized",
+			Token:   token,
+		}, nil
+	}
+	return struct {
+		Message string `json:"message"`
+		Token   string `json:"token"`
+	}{
+		Message: "Unauthorized",
+		Token:   token,
+	}, nil
 }
 
-// 装饰器 (可选)
 func (api *Login) Decorators() []iz2go.Decorator {
 	return []iz2go.Decorator{
 		middlewires.RequireRoles([]string{"admin"}),
