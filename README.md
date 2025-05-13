@@ -94,17 +94,31 @@ iz2go gen
 在入口文件(如`main.go`)中添加如下代码：
 
 ```golang
+package main
+
 import (
-    "github.com/LingHeChen/iz2go"
-    "<模块名>/api_gen"
+	"iz2go_test/api_gen"
+	"net/http"
+
+	iz2go "github.com/LingHeChen/iz2go/pkg/core"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    // ...其他代码
-    api_gen.InitRoutes()
-    r := iz2go.NewRouter() // 会返回一个 *gin.Engine
-    r.Run(":<port>")
-    // ...其他代码
+	api_gen.InitRoutes()
+	iz2go.RegisterErrorHook(func(ctx *gin.Context, err iz2go.IError) (iz2go.IError, bool) {
+		ctx.JSON(http.StatusOK, gin.H{"error": err.Error(), "code": err.GetCode()})
+		return nil, true
+	})
+	r := iz2go.Default()
+	r.RenderSwagger(&iz2go.SwaggerRenderConfig{
+		Info: &iz2go.Info{
+			Title:       "API Documentation",
+			Description: "API Documentation for the project",
+			Version:     "1.0.0",
+		},
+	})
+	r.Run(":8083")
 }
 ```
 
