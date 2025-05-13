@@ -180,7 +180,7 @@ func getRequestType(handler *HandlerInfo) reflect.Type {
 
 // 生成参数定义
 func generateParameters(requestType reflect.Type, handler *HandlerInfo) ([]Parameter, map[string]Definition) {
-	var parameters []Parameter
+	parameters := make([]Parameter, 0)
 	definitions := make(map[string]Definition)
 
 	if requestType.Kind() == reflect.Struct {
